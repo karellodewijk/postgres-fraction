@@ -8,31 +8,31 @@ CREATE OR REPLACE FUNCTION GCDiv(a INTEGER, b INTEGER)
 RETURNS INTEGER AS 
 $$ 
 DECLARE 
-	c INTEGER; 
+    c INTEGER; 
 BEGIN 
-	IF (a IS NULL OR b IS NULL OR (a = 0 AND b = 0)) THEN 
-		RETURN 0;
-	END IF;
-	RAISE NOTICE 'a: %', a;
-	RAISE NOTICE 'b: %', b;
-	IF (a = 0 OR b = 0) THEN 
-		RETURN ABS(a) + ABS(b); 
-	END IF; 
-	IF (ABS(a) < ABS(b)) THEN 
-		c = ABS(a); 
-		a = ABS(b); 
-		b = c; 
-	ELSE 
-		a = ABS(a); 
-		b = ABS(b); 
-	END IF; 
-	c = a % b; 
-	WHILE c > 0 LOOP 
-		a = b; 
-		b = c; 
-		c = a % b; 
-	END LOOP; 
-	RETURN b; 
+    IF (a IS NULL OR b IS NULL OR (a = 0 AND b = 0)) THEN 
+        RETURN 0;
+    END IF;
+    RAISE NOTICE 'a: %', a;
+    RAISE NOTICE 'b: %', b;
+    IF (a = 0 OR b = 0) THEN 
+        RETURN ABS(a) + ABS(b); 
+    END IF; 
+    IF (ABS(a) < ABS(b)) THEN 
+        c = ABS(a); 
+        a = ABS(b); 
+        b = c; 
+    ELSE 
+        a = ABS(a); 
+        b = ABS(b); 
+    END IF; 
+    c = a % b; 
+    WHILE c > 0 LOOP 
+        a = b; 
+        b = c; 
+        c = a % b; 
+    END LOOP; 
+    RETURN b; 
 END; 
 $$ LANGUAGE 'plpgsql';
 
@@ -41,7 +41,7 @@ CREATE OR REPLACE FUNCTION LCDenom(a INTEGER, b INTEGER)
 RETURNS INTEGER AS 
 $$ 
 BEGIN 
-	RETURN a / GCDiv(a, b) * b; 
+    RETURN a / GCDiv(a, b) * b; 
 END; 
 $$ LANGUAGE 'plpgsql'; 
 
@@ -49,20 +49,20 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION simplify(a Fraction) RETURNS Fraction AS 
 $$ 
 DECLARE 
-	gcd INTEGER; 
+    gcd INTEGER; 
 BEGIN 
-	LOOP 
-		gcd = GCDiv(a.n, a.d); 
-		EXIT WHEN gcd = 0; 
-		EXIT WHEN gcd = 1; 
-		a.n = a.n / gcd; 
-		a.d = a.d / gcd; 
-	END LOOP; 
-	IF (a.d < 0) THEN /*always remove the minus FROM the denominator, !!other gt/gte/lt/lte relies on thsi behaviour*/
-		a.n = -a.n;
-		a.d = -a.d;
-	END IF;
-	RETURN a;
+    LOOP 
+        gcd = GCDiv(a.n, a.d); 
+        EXIT WHEN gcd = 0; 
+        EXIT WHEN gcd = 1; 
+        a.n = a.n / gcd; 
+        a.d = a.d / gcd; 
+    END LOOP; 
+    IF (a.d < 0) THEN /*always remove the minus FROM the denominator, !!other gt/gte/lt/lte relies on thsi behaviour*/
+        a.n = -a.n;
+        a.d = -a.d;
+    END IF;
+    RETURN a;
 END; 
 $$ LANGUAGE 'plpgsql'; 
 
@@ -80,13 +80,13 @@ CREATE CAST (INTEGER AS Fraction) WITH FUNCTION integer_to_fraction(INTEGER) AS 
 CREATE OR REPLACE FUNCTION fraction_add(a Fraction, b Fraction) RETURNS Fraction AS 
 $$ 
 DECLARE 
-	c Fraction; 
+    c Fraction; 
 BEGIN 
-	c.d = LCDenom(a.d, b.d); 
-	c.n = a.n * (c.d / a.d); 
-	c.n = c.n + b.n * (c.d / b.d); 
-	c = simplify(c); 
-	RETURN c; 
+    c.d = LCDenom(a.d, b.d); 
+    c.n = a.n * (c.d / a.d); 
+    c.n = c.n + b.n * (c.d / b.d); 
+    c = simplify(c); 
+    RETURN c; 
 END; 
 $$ LANGUAGE 'plpgsql'; 
 
@@ -94,13 +94,13 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION fraction_sub(a Fraction, b Fraction) RETURNS Fraction AS 
 $$ 
 DECLARE 
-	c Fraction; 
+    c Fraction; 
 BEGIN 
-	c.d = LCDenom(a.d, b.d); 
-	c.n = a.n * (c.d / a.d); 
-	c.n = c.n - b.n * (c.d / b.d);
-	c = simplify(c);
-	RETURN c;
+    c.d = LCDenom(a.d, b.d); 
+    c.n = a.n * (c.d / a.d); 
+    c.n = c.n - b.n * (c.d / b.d);
+    c = simplify(c);
+    RETURN c;
 END; 
 $$ LANGUAGE 'plpgsql'; 
 
@@ -108,12 +108,12 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION fraction_mul(a Fraction, b Fraction) RETURNS Fraction AS 
 $$ 
 DECLARE 
-	c Fraction; 
+    c Fraction; 
 BEGIN 
-	c.n = a.n * a.n;
-	c.d = a.d * b.d;
-	c = simplify(c);
-	RETURN c;
+    c.n = a.n * a.n;
+    c.d = a.d * b.d;
+    c = simplify(c);
+    RETURN c;
 END; 
 $$ LANGUAGE 'plpgsql'; 
 
@@ -121,12 +121,12 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION fraction_div(a Fraction, b Fraction) RETURNS Fraction AS 
 $$ 
 DECLARE 
-	c Fraction; 
+    c Fraction; 
 BEGIN 
-	c.n = a.n * b.d;
-	c.d = a.d * b.n;
-	c = simplify(c);
-	RETURN c;
+    c.n = a.n * b.d;
+    c.d = a.d * b.n;
+    c = simplify(c);
+    RETURN c;
 END; 
 $$ LANGUAGE 'plpgsql'; 
 
@@ -134,28 +134,28 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION fraction_abs(a Fraction) RETURNS Fraction AS 
 $$ 
 DECLARE 
-	c Fraction; 
+    c Fraction; 
 BEGIN 
-	IF ((a.n::NUMERIC / a.d::NUMERIC) < 0) THEN 
-		/*prevents returning -a.n/-a.d, which is technically correct but maybe jarring*/ 
-		IF (a.d < 0) THEN 
-			c.n = a.n; 
-			c.d = -a.d; 
-		ELSE 
-			c.n = -a.n; 
-			c.d = a.d; 
-		END IF; 
-		RETURN c; 
-	ELSE 
-		/*prevents returning -a.n/-a.d, which is technically correct but maybe jarring*/ 
-		IF (a.d < 0) THEN 
-			c.n = -a.n; 
-			c.d = -a.d; 
-			RETURN c;
-		ELSE 
-			RETURN a; 
-		END IF; 
-	END IF; 
+    IF ((a.n::NUMERIC / a.d::NUMERIC) < 0) THEN 
+        /*prevents returning -a.n/-a.d, which is technically correct but maybe jarring*/ 
+        IF (a.d < 0) THEN 
+            c.n = a.n; 
+            c.d = -a.d; 
+        ELSE 
+            c.n = -a.n; 
+            c.d = a.d; 
+        END IF; 
+        RETURN c; 
+    ELSE 
+        /*prevents returning -a.n/-a.d, which is technically correct but maybe jarring*/ 
+        IF (a.d < 0) THEN 
+            c.n = -a.n; 
+            c.d = -a.d; 
+            RETURN c;
+        ELSE 
+            RETURN a; 
+        END IF; 
+    END IF; 
 END; 
 $$ LANGUAGE 'plpgsql'; 
 
@@ -163,170 +163,170 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION fraction_pow(a Fraction, p INTEGER) RETURNS Fraction AS 
 $$ 
 DECLARE 
-	c Fraction; 
+    c Fraction; 
 BEGIN 
-	c.n = power(a.n, p);
-	c.d = power(a.d, p);
-	c = simplify(c);
-	RETURN c;
+    c.n = power(a.n, p);
+    c.d = power(a.d, p);
+    c = simplify(c);
+    RETURN c;
 END; 
 $$ LANGUAGE 'plpgsql'; 
 
 CREATE OR REPLACE FUNCTION gt(a Fraction, b Fraction) RETURNS BOOLEAN AS 
 $$ 
 BEGIN 
-	 RETURN (a - b).n > 0;
+     RETURN (a - b).n > 0;
 END; 
 $$ LANGUAGE 'plpgsql'; 
 
 CREATE OR REPLACE FUNCTION gte(a Fraction, b Fraction) RETURNS BOOLEAN AS 
 $$ 
 BEGIN 
-	 RETURN (a - b).n >= 0;
+     RETURN (a - b).n >= 0;
 END; 
 $$ LANGUAGE 'plpgsql'; 
 
 CREATE OR REPLACE FUNCTION lt(a Fraction, b Fraction) RETURNS BOOLEAN AS 
 $$ 
 BEGIN 
-	 RETURN (a - b).n < 0;
+     RETURN (a - b).n < 0;
 END; 
 $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION lte(a Fraction, b Fraction) RETURNS BOOLEAN AS 
 $$ 
 BEGIN 
-	 RETURN (a - b).n <= 0;
+     RETURN (a - b).n <= 0;
 END; 
 $$ LANGUAGE 'plpgsql'; 
 
 CREATE OR REPLACE FUNCTION min(a Fraction, b Fraction) RETURNS Fraction AS 
 $$ 
 BEGIN 
-	IF (a::float8 < b::float8) THEN 
-		RETURN a; 
-	ELSE 
-		RETURN b; 
-	END IF; 
+    IF (a::float8 < b::float8) THEN 
+        RETURN a; 
+    ELSE 
+        RETURN b; 
+    END IF; 
 END; 
 $$ LANGUAGE 'plpgsql'; 
 
 CREATE OR REPLACE FUNCTION max(a Fraction, b Fraction) RETURNS Fraction AS 
 $$ 
 BEGIN 
-	IF (a::float8 < b::float8) THEN 
-		RETURN b; 
-	ELSE 
-		RETURN a; 
-	END IF; 
+    IF (a::float8 < b::float8) THEN 
+        RETURN b; 
+    ELSE 
+        RETURN a; 
+    END IF; 
 END; 
 $$ LANGUAGE 'plpgsql'; 
 
 CREATE OPERATOR + (
-	 leftarg = Fraction,
-	 rightarg = Fraction,
-	 procedure = fraction_add,
-	 commutator = +
+     leftarg = Fraction,
+     rightarg = Fraction,
+     procedure = fraction_add,
+     commutator = +
 );
 
 CREATE OPERATOR - (
-	 leftarg = Fraction,
-	 rightarg = Fraction,
-	 procedure = fraction_sub,
-	 commutator = -
+     leftarg = Fraction,
+     rightarg = Fraction,
+     procedure = fraction_sub,
+     commutator = -
 );
 
 CREATE OPERATOR * (
-	 leftarg = Fraction,
-	 rightarg = Fraction,
-	 procedure = fraction_mul,
-	 commutator = *
+     leftarg = Fraction,
+     rightarg = Fraction,
+     procedure = fraction_mul,
+     commutator = *
 );
 
 CREATE OPERATOR / (
-	 leftarg = Fraction,
-	 rightarg = Fraction,
-	 procedure = fraction_div,
-	 commutator = /
+     leftarg = Fraction,
+     rightarg = Fraction,
+     procedure = fraction_div,
+     commutator = /
 );
 
 CREATE OPERATOR > (
-	 leftarg = Fraction,
-	 rightarg = Fraction,
-	 procedure = gt,
-	 commutator = >
+     leftarg = Fraction,
+     rightarg = Fraction,
+     procedure = gt,
+     commutator = >
 );
 
 CREATE OPERATOR >= (
-	 leftarg = Fraction,
-	 rightarg = Fraction,
-	 procedure = gte,
-	 commutator = >=
+     leftarg = Fraction,
+     rightarg = Fraction,
+     procedure = gte,
+     commutator = >=
 );
 
 CREATE OPERATOR < (
-	 leftarg = Fraction,
-	 rightarg = Fraction,
-	 procedure = lt,
-	 commutator = <
+     leftarg = Fraction,
+     rightarg = Fraction,
+     procedure = lt,
+     commutator = <
 );
 
 CREATE OPERATOR <= (
-	 leftarg = Fraction,
-	 rightarg = Fraction,
-	 procedure = lte,
-	 commutator = <=
+     leftarg = Fraction,
+     rightarg = Fraction,
+     procedure = lte,
+     commutator = <=
 );
 
 CREATE OPERATOR @ (
-	 rightarg = Fraction,
-	 procedure = fraction_abs 
+     rightarg = Fraction,
+     procedure = fraction_abs 
 ); 
 
 CREATE OPERATOR ^ ( 
-	 leftarg = Fraction, 
-	 rightarg = INTEGER, 
-	 procedure = fraction_pow, 
-	 commutator = ^ 
+     leftarg = Fraction, 
+     rightarg = INTEGER, 
+     procedure = fraction_pow, 
+     commutator = ^ 
 ); 
 
 /*aggregate functions*/
 CREATE AGGREGATE sum(Fraction) (
-	 sfunc = fraction_add,
-	 stype = Fraction,
-	 initcond = '(0,1)',
-	 msfunc = fraction_add,
-	 minvfunc = fraction_sub,
-	 mstype = Fraction,
-	 minitcond = '(0,1)'
+     sfunc = fraction_add,
+     stype = Fraction,
+     initcond = '(0,1)',
+     msfunc = fraction_add,
+     minvfunc = fraction_sub,
+     mstype = Fraction,
+     minitcond = '(0,1)'
 );
 
 /*Will actually break if all fractions are > (1073741823/1), if you want to  change the value below you'll also need to change the algorithm*/
 CREATE AGGREGATE min(Fraction) (
-	 sfunc = min,
-	 stype = Fraction,
-	 initcond = '(2147483647, 1)' /*half of maximum value rounded down*/
+     sfunc = min,
+     stype = Fraction,
+     initcond = '(2147483647, 1)' /*half of maximum value rounded down*/
 );
 
 CREATE AGGREGATE max(Fraction) (
-	 sfunc = max,
-	 stype = Fraction,
-	 initcond = '(-2147483648, 1)'  /*half of minimum value rounded down*/
+     sfunc = max,
+     stype = Fraction,
+     initcond = '(-2147483648, 1)'  /*half of minimum value rounded down*/
 );
 
 CREATE OR REPLACE FUNCTION calculate_avg(arr Fraction[]) RETURNS Fraction AS 
 $$ 
 DECLARE 
-	sum Fraction; 
-	el Fraction;
+    sum Fraction; 
+    el Fraction;
 BEGIN 
-	sum = (0,1); 
-	FOREACH el IN ARRAY arr LOOP 
-		sum = sum + el; 
-	END LOOP; 
-	sum.d = sum.d * array_length(arr, 1);
-	sum = simplify(sum); 
-	RETURN sum; 
+    sum = (0,1); 
+    FOREACH el IN ARRAY arr LOOP 
+        sum = sum + el; 
+    END LOOP; 
+    sum.d = sum.d * array_length(arr, 1);
+    sum = simplify(sum); 
+    RETURN sum; 
 END; 
 $$ LANGUAGE 'plpgsql'; 
 
