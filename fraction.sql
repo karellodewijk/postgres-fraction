@@ -108,7 +108,7 @@ $$
 DECLARE 
     c Fraction; 
 BEGIN 
-    c.n = a.n * a.n;
+    c.n = a.n * b.n;
     c.d = a.d * b.d;
     c = simplify(c);
     RETURN c;
