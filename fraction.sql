@@ -172,6 +172,15 @@ BEGIN
 END; 
 $$ LANGUAGE 'plpgsql'; 
 
+/*check equality, may look as a bit of cheat, but the increased accuracy of float8 makes this safe for the ranges the nominator and denominator can be in. It's definately more accurate to simplify a and b and then compare them,
+ but simplify is expensive and equality checking is VERY VERY common, so this is much quicker*/ 
+CREATE OR REPLACE FUNCTION fraction_equal(a Fraction, b Fraction) RETURNS BOOLEAN AS 
+$$ 
+BEGIN 
+	RETURN (a::float8 = b::float8);
+END; 
+$$ LANGUAGE 'plpgsql'; 
+
 CREATE OR REPLACE FUNCTION gt(a Fraction, b Fraction) RETURNS BOOLEAN AS 
 $$ 
 BEGIN 
@@ -289,6 +298,13 @@ CREATE OPERATOR ^ (
      procedure = fraction_pow, 
      commutator = ^ 
 ); 
+
+CREATE OPERATOR = ( 
+     leftarg = Fraction, 
+     rightarg = Fraction, 
+     procedure = fraction_equal, 
+     commutator = = 
+);
 
 /*aggregate functions*/
 CREATE AGGREGATE sum(Fraction) (
