@@ -13,8 +13,6 @@ BEGIN
     IF (a IS NULL OR b IS NULL OR (a = 0 AND b = 0)) THEN 
         RETURN 0;
     END IF;
-    RAISE NOTICE 'a: %', a;
-    RAISE NOTICE 'b: %', b;
     IF (a = 0 OR b = 0) THEN 
         RETURN ABS(a) + ABS(b); 
     END IF; 
@@ -174,10 +172,19 @@ $$ LANGUAGE 'plpgsql';
 
 /*check equality, may look as a bit of cheat, but the increased accuracy of float8 makes this safe for the ranges the nominator and denominator can be in. It's definately more accurate to simplify a and b and then compare them,
  but simplify is expensive and equality checking is VERY VERY common, so this is much quicker*/ 
-CREATE OR REPLACE FUNCTION fraction_equal(a Fraction, b Fraction) RETURNS BOOLEAN AS 
+/*
+ CREATE OR REPLACE FUNCTION fraction_equal(a Fraction, b Fraction) RETURNS BOOLEAN AS 
 $$ 
 BEGIN 
 	RETURN (a::float8 = b::float8);
+END; 
+$$ LANGUAGE 'plpgsql'; 
+*/
+
+CREATE OR REPLACE FUNCTION fraction_equal(a Fraction, b Fraction) RETURNS BOOLEAN AS 
+$$ 
+BEGIN 
+	RETURN (a - b).n = 0; 
 END; 
 $$ LANGUAGE 'plpgsql'; 
 
